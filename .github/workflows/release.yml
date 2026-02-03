@@ -5,6 +5,10 @@ on:
     tags:
       - 'v*'
 
+# 顶层权限设置，确保所有 job 都有正确的权限
+permissions:
+  contents: write
+
 jobs:
   release:
     permissions:
