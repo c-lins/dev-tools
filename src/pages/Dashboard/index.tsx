@@ -98,7 +98,7 @@ export default function Dashboard() {
       </Row>
 
       {/* Info Cards */}
-      <Row gutter={[16, 16]} style={{ marginTop: 24 }}>
+      <Row gutter={[16, 16]} style={{ marginTop: 24 }} align="stretch">
         <Col xs={24} md={12}>
           <div className="glass" style={{ padding: 24, height: '100%' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
