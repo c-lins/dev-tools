@@ -1,9 +1,48 @@
-import { Typography, Row, Col } from 'antd';
-import { HeartOutlined } from '@ant-design/icons';
+import { useState, useEffect } from 'react';
+import { Typography, Row, Col, Button, message } from 'antd';
+import { HeartOutlined, GithubOutlined, SyncOutlined } from '@ant-design/icons';
+import { getVersion } from '@tauri-apps/api/app';
+import { open } from '@tauri-apps/plugin-opener';
+import { invoke } from '@tauri-apps/api/core';
 
 const { Title, Text, Paragraph } = Typography;
 
+const GITHUB_URL = 'https://github.com/dengyuwu/dev-tools';
+
 export default function About() {
+  const [version, setVersion] = useState('');
+  const [checking, setChecking] = useState(false);
+
+  useEffect(() => {
+    getVersion().then(setVersion).catch(() => setVersion('0.0.0'));
+  }, []);
+
+  // 打开 GitHub 页面
+  const openGitHub = async () => {
+    try {
+      await open(GITHUB_URL);
+    } catch (e) {
+      message.error('无法打开链接');
+    }
+  };
+
+  // 检查更新
+  const checkUpdate = async () => {
+    setChecking(true);
+    try {
+      const result = await invoke<{ available: boolean; version?: string } | null>('check_for_updates');
+      if (result?.available) {
+        message.success(`发现新版本 ${result.version}，请前往 GitHub 下载`);
+        await open(`${GITHUB_URL}/releases/latest`);
+      } else {
+        message.info('当前已是最新版本');
+      }
+    } catch (e) {
+      message.error('检查更新失败');
+    }
+    setChecking(false);
+  };
+
   return (
     <div>
       {/* Header */}
@@ -94,17 +133,24 @@ export default function About() {
             }}>
               <div>
                 <Text style={{ color: 'rgba(255, 255, 255, 0.5)' }}>
-                  版本 v0.1.0
+                  版本 v{version}
                 </Text>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <Text style={{ color: 'rgba(255, 255, 255, 0.5)' }}>
-                  Made with
-                </Text>
-                <HeartOutlined style={{ color: '#ec4899' }} />
-                <Text style={{ color: 'rgba(255, 255, 255, 0.5)' }}>
-                  by Developer
-                </Text>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <Button
+                  icon={<GithubOutlined />}
+                  onClick={openGitHub}
+                >
+                  GitHub
+                </Button>
+                <Button
+                  type="primary"
+                  icon={<SyncOutlined spin={checking} />}
+                  onClick={checkUpdate}
+                  loading={checking}
+                >
+                  检查更新
+                </Button>
               </div>
             </div>
           </div>
